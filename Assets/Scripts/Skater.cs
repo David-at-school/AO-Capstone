@@ -61,8 +61,8 @@ public class Skater : MonoBehaviour
         }
 
         //movement
-        rb.AddForce(transform.forward * input.z * speed * Time.fixedDeltaTime, ForceMode.VelocityChange);
         rb.AddTorque(transform.up * input.x * turnRate * Time.fixedDeltaTime, ForceMode.Impulse);
+        rb.AddForce(transform.forward * input.z * speed * Time.fixedDeltaTime, ForceMode.VelocityChange);
 
         upDir = Vector3.up;
 

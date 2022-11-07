@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
 
 public class ParkBuilder : MonoBehaviour
 {
@@ -21,7 +23,47 @@ public class ParkBuilder : MonoBehaviour
 
     }
 
-    public void ChooseParts()
+    public GameObject ChoosePart(int x, int y)
+    {
+        //if border, make plane
+        if (x == 0 || x == width - 1 || y == 0 || y == length - 1)
+        {
+            parts[x, y] = 0;
+        }
+        else
+        {
+            List<GameObject> southParts = usableObjects[parts[x, y - 1]].GetComponent<ParkComponent>().northUsableObjects;
+            List<GameObject> eastParts = usableObjects[parts[x - 1, y]].GetComponent<ParkComponent>().westUsableObjects;
+            List<GameObject> endParts = usableObjects;
+            if (y == length - 2)
+            {
+                List<GameObject> northParts = usableObjects[parts[x, y - 1]].GetComponent<ParkComponent>().southUsableObjects;
+                endParts = endParts.Intersect(northParts).ToList();
+            }
+            if (x == width - 2)
+            {
+                List<GameObject> westParts = usableObjects[parts[x, y - 1]].GetComponent<ParkComponent>().eastUsableObjects;
+                endParts = endParts.Intersect(westParts).ToList();
+            }
+            List<GameObject> overlap = southParts.Intersect(eastParts).Intersect(endParts).ToList();
+
+            if (overlap.Count > 0)
+            {
+                int rng = Random.Range(0, overlap.Count);
+                GameObject go = overlap[rng];
+
+                int part = usableObjects.IndexOf(go, 0);
+                parts[x, y] = part;
+            }
+            else
+            {
+                parts[x, y] = 0;
+            }
+        }
+        return usableObjects[parts[x, y]];
+    }
+
+    public void ResetParts()
     {
         parts = new int[width, length];
 
@@ -29,31 +71,7 @@ public class ParkBuilder : MonoBehaviour
         {
             for (int j = 0; j < length; j++)
             {
-                if (i == 0 || i == width - 1 || j == 0 || j == length - 1)
-                {
-                    parts[i, j] = 0;
-                }
-                else
-                {
-                    if (parts[i, j - 1] == 20)
-                    {
-                        if (parts[i, j + 1] != 0)
-                        {
-                            if (Random.value < 0.5f)
-                            {
-                                parts[i, j] = 4;
-                            }
-                            else
-                            {
-                                parts[i, j] = 17;
-                            }
-                        }
-                        else
-                        {
-                            parts[i, j] = 17;
-                        }
-                    }
-                }
+                parts[i, j] = -1;
             }
         }
     }
@@ -61,21 +79,30 @@ public class ParkBuilder : MonoBehaviour
     public void BuildPark()
     {
         DestroyChildren();
+        ResetParts();
 
         for (int i = 0; i < width; i++)
         {
+            int height = 0;
             for (int j = 0; j < length; j++)
             {
-                Vector3 partPosition = new Vector3(j * 1, 0, i * 1);
 
-                if (i == 0 || i == width - 1 || j == 0 || j == length - 1)
+                GameObject go = ChoosePart(i, j);
+
+                int heightMod = go.GetComponent<ParkComponent>().heightModifier;
+
+                if (heightMod < 0)
                 {
-                    Instantiate(usableObjects[0], partPosition, Quaternion.identity, transform);
+                    height += heightMod;
                 }
-                else
+                Vector3 partPosition = new Vector3(j * 1, 0, i * 1);
+                //Vector3 partPosition = new Vector3(j * 1, heightMod, i * 1);
+                if (heightMod > 0)
                 {
-                    Instantiate(usableObjects[Random.Range(0, usableObjects.Count)], partPosition, Quaternion.identity, transform);
+                    height += heightMod;
                 }
+
+                Instantiate(go, partPosition, Quaternion.identity, transform);
             }
         }
     }

@@ -10,12 +10,22 @@ public class ParkBuilderEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        base.OnInspectorGUI();
+        if (GUILayout.Button("Reset Parts"))
+        {
+            parkBuilder.ResetParts();
+        }
+
+        if (GUILayout.Button("Build Part"))
+        {
+            parkBuilder.BuildPart();
+        }
 
         if (GUILayout.Button("Generate Park"))
         {
             parkBuilder.BuildPark();
         }
+
+        base.OnInspectorGUI();
     }
 
     private void OnEnable()

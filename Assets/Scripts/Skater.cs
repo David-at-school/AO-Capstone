@@ -7,10 +7,11 @@ using TMPro;
 
 public class Skater : MonoBehaviour
 {
-
     [SerializeField] float speed = 1.0f;
     [SerializeField] float turnRate = 1.0f;
     [SerializeField] float jumpForce = 5.0f;
+    [SerializeField] float fallMultiplier = 2.5f;
+    [SerializeField] float lowJumpMultiplier = 2.0f;
     [SerializeField] Rigidbody rb;
     //[SerializeField] GameObject rocketPrefab;
     PlayerInput playerInput;
@@ -22,6 +23,7 @@ public class Skater : MonoBehaviour
     Vector3 upDir;
 
     bool grounded = true;
+    bool jumping = false;
     float uprightTorque = 5.0f;
 
     public int avgFrameRate;
@@ -37,6 +39,11 @@ public class Skater : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetButton("Jump"))
+        {
+            jumping = true;
+        }
+
         if (Physics.Raycast(rb.position, -rb.transform.up, out groundHit, 1.5f))
         {
             upDir = groundHit.normal;
@@ -45,7 +52,7 @@ public class Skater : MonoBehaviour
         float current = 0;
         current = (int)(1f / Time.fixedUnscaledDeltaTime);
         avgFrameRate = (int)current;
-        display_Text.text = avgFrameRate.ToString() + " FPS";
+        //display_Text.text = avgFrameRate.ToString() + " FPS";
     }
 
     private void FixedUpdate()
@@ -58,6 +65,18 @@ public class Skater : MonoBehaviour
         else
         {
             grounded = false;
+        }
+
+        if (rb.velocity.y < 0)
+        {
+            //rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+            rb.AddForce(Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime, ForceMode.Impulse);
+            
+        }
+        else if (rb.velocity.y > 0 && !jumping)
+        {
+            //rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+            rb.AddForce(Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime, ForceMode.Impulse);
         }
 
         //movement
@@ -105,5 +124,9 @@ public class Skater : MonoBehaviour
         }
     }
 
+    public void OnLook(InputValue inputValue)
+    {
+
+    }
 
 }

@@ -9,7 +9,7 @@ public class ParkComponent : MonoBehaviour
     public List<GameObject> eastUsableObjects = new List<GameObject>();
     public List<GameObject> southUsableObjects = new List<GameObject>();
     public List<GameObject> westUsableObjects = new List<GameObject>();
-
+    public List<GameObject> southwestUsableObjects = new List<GameObject>();
 
     void Start()
     {

@@ -141,7 +141,7 @@ public class ParkBuilder : MonoBehaviour
                 }
 
                 //go.transform.localScale = Vector3.one * scale;
-                Instantiate(go, partPosition, Quaternion.identity, transform);
+                Instantiate(go, partPosition + transform.position, Quaternion.identity, transform);
             }
         }
     }

@@ -12,6 +12,8 @@ public class Skater : MonoBehaviour
     [SerializeField] float jumpForce = 5.0f;
     [SerializeField] float fallMultiplier = 2.5f;
     [SerializeField] float lowJumpMultiplier = 2.0f;
+    [SerializeField] float airRotateMultiplier = 1.5f;
+
     [SerializeField] Rigidbody rb;
     //[SerializeField] GameObject rocketPrefab;
     PlayerInput playerInput;
@@ -26,8 +28,11 @@ public class Skater : MonoBehaviour
     bool jumping = false;
     float uprightTorque = 5.0f;
 
-    public int avgFrameRate;
-    public TextMeshProUGUI display_Text;
+    [SerializeField] float dampen = 5.0f;
+    [SerializeField] float adjust = 5.0f;
+
+    //public int avgFrameRate;
+    //public TextMeshProUGUI display_Text;
 
     void Start()
     {
@@ -49,23 +54,16 @@ public class Skater : MonoBehaviour
             upDir = groundHit.normal;
         }
 
-        float current = 0;
-        current = (int)(1f / Time.fixedUnscaledDeltaTime);
-        avgFrameRate = (int)current;
+        //float current = 0;
+        //current = (int)(1f / Time.fixedUnscaledDeltaTime);
+        //avgFrameRate = (int)current;
         //display_Text.text = avgFrameRate.ToString() + " FPS";
     }
 
     private void FixedUpdate()
     {
         //Debug.DrawRay(transform.position, Vector3.down, Color.red, 1.0f);
-        if (Physics.Raycast(transform.position, Vector3.down, 0.9f))
-        {
-            grounded = true;
-        }
-        else
-        {
-            grounded = false;
-        }
+        grounded = Physics.Raycast(transform.position, Vector3.down, 0.9f);
 
         if (rb.velocity.y < 0)
         {
@@ -82,10 +80,12 @@ public class Skater : MonoBehaviour
         //movement
         rb.AddTorque(transform.up * input.x * turnRate * Time.fixedDeltaTime, ForceMode.Impulse);
         rb.AddForce(transform.forward * input.z * speed * Time.fixedDeltaTime, ForceMode.VelocityChange);
+        //rb.MovePosition(transform.position + transform.forward * input.z * speed * Time.fixedDeltaTime);
 
         upDir = Vector3.up;
 
         //get normal of ground
+        Debug.DrawRay(rb.position, -rb.transform.up);
         if (Physics.Raycast(rb.position, -rb.transform.up, out groundHit, 1.5f))
         {
             upDir = groundHit.normal;
@@ -97,9 +97,8 @@ public class Skater : MonoBehaviour
         float angle;
         deltaQuat.ToAngleAxis(out angle, out axis);
 
-        float dampen = 2.0f;
+        
         rb.AddTorque(-rb.angularVelocity * dampen, ForceMode.Acceleration);
-        float adjust = 2.0f;
         rb.AddTorque(axis.normalized * angle * adjust, ForceMode.Acceleration);
     }
 
